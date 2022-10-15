@@ -6,7 +6,10 @@ from torch import optim
 import numpy as np
 
 from NetworkSpecification import *
-    
+
+
+UNTRAINED_FOLDER = 'Untrained'
+
 
 def parse_specifications(user_input):
     """
@@ -71,18 +74,7 @@ def generate_networks(network_specifications):
     None.
 
     """
-    for spec in network_specifications:
-        
-        # Unpack specification
-        N, activation, neurons = spec.N, spec.activation, spec.neurons
-        
-        network_list = list()
-        
-        for i, layer_size in enumerate(neurons):
-            network_list.append(nn.LazyLinear())
-            network_list.append(get_activation(activation, i))
-        
-        sequential_and_save(network_list)
+   
     
     def sequential_and_save(network_list):
         """
@@ -103,5 +95,49 @@ def generate_networks(network_specifications):
         """
         
         model = nn.Sequential(*network_list)
+        
+        # torch.save
+    
+    def get_activation(activation, index):
+        
+        # Default case where activation is a simple string
+        func = activation
+        
+        # Special case where a list of activation functions was provided
+        if type(activation) is list:
+            func = activation[index]
+       
+        ''' Use Try-Except to deal with possibilities of invalid input '''
+        if func == 'sigmoid':
+            return nn.Sigmoid()
+        elif func == 'relu':
+            return nn.ReLU()
+        else:
+            raise NotImplementedError()
+    
+    
+    
+    
+    
+    for spec in network_specifications:
+     
+    # Unpack specification
+        N, activation, neurons = spec.N, spec.activation, spec.neurons
+         
+        network_list = list()
+         
+        for i, layer_size in enumerate(neurons):
+             network_list.append(nn.LazyLinear(layer_size))
+             network_list.append(get_activation(activation, i))
+         
+        # sequential_and_save(network_list)
+     
+    model = nn.Sequential(*network_list) 
+    
+    
+    return model
+
+
+input = [(1, 'sigmoid', [3, 4, 5, 2, 1])]
                 
         

@@ -9,6 +9,7 @@ from NetworkSpecification import *
 
 
 UNTRAINED_FOLDER = 'Untrained'
+TRAINED_FOLDER = 'Trained'
 
 
 def parse_specifications(user_input):
@@ -140,4 +141,6 @@ def generate_networks(network_specifications):
 
 input = [(1, 'sigmoid', [3, 4, 5, 2, 1])]
                 
-        
+n_arch, n_net, net_spec = parse_specifications(input)
+
+model = generate_networks(net_spec)

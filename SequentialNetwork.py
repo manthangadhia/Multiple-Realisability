@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 
 class SequentialNetwork(nn.Module):
@@ -50,8 +51,11 @@ class SequentialNetwork(nn.Module):
             X = module(X)
         return X
     
+    def __str__(self):
+        return "This is a print"
+    
     def save(self, PATH):
-        pass
+        torch.save(self.state_dict(), PATH)
     
     def train(self, X_train, y_train):
         pass

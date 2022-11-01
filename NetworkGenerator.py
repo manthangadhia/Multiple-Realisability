@@ -79,8 +79,7 @@ def generate_networks(network_specifications):
     """
    
     ''' Define helper functions '''
-    def instantiate_and_save_sequential_network(network_list, names, 
-                                                network_info):
+    def instantiate_and_save_sequential_network(network_list, network_info):
         """
         Given a list of nn.Layers, generate a sequential network and save it
         to disk.
@@ -90,11 +89,6 @@ def generate_networks(network_specifications):
         network_list : List
             Contains torch.nn items corresponding to the layers and activation
             functions of the desired network.
-        
-        names : List
-            Contains a strings with appropriate names corresponding to each
-            layer and activation function in the network_list. This is needed
-            by SequentialNetwork when calling add_module().
         
         network_info : Tuple <num_spec, num_copy, num_layers>
             Contains information about the network being instantiated to be 
@@ -108,26 +102,21 @@ def generate_networks(network_specifications):
         """
 
         # Instantiate network with list of layers and activation functions
-        model = SequentialNetwork(network_list, names)
+        model = SequentialNetwork(network_list)
                 
         # Generate name based on network (format: "archX_copyX_Xlayers")
         
-        print('Network Info', network_info)
-        
         num_spec = "arch" + str(network_info[0])
-        print(num_spec)
         copy = "copy" + str(network_info[1])
-        print(copy)
         layers = str(network_info[2]) + "layers"
-        print(layers)
         filename = "_".join([num_spec, copy, layers]) + EXTENSION
-        print(filename)
-        
+
         # Save network with given name in UNTRAINED folder
         PATH = "/".join([UNTRAINED_FOLDER, filename])
         
         
         model.save(PATH)
+        
         
         
     def get_activation(activation, index=None):
@@ -155,7 +144,6 @@ def generate_networks(network_specifications):
         N, activation, neurons = spec.N, spec.activation, spec.neurons
          
         network_list = list()
-        names = list()
         
         # Create N networks with the given specification
         for n in range(N):
@@ -163,17 +151,15 @@ def generate_networks(network_specifications):
             # LazyLinear is used to allow for input_dims to be inferred during
             # the first forward pass through the network.
             for i, layer_size in enumerate(neurons):
-                network_list.append(nn.LazyLinear(layer_size))
-                names.append('Hidden Layer {}'.format(i))
-                
+                network_list.append(nn.LazyLinear(layer_size))                
                 network_list.append(get_activation(activation, i))
-                names.append('Activation {}'.format(i))
             
             # Append final LazyLinear layer corresponding with output_dims=1
             network_list.append(nn.LazyLinear(1))
-            names.append('OutputLayer')
+            
+            print(network_list)
              
-            instantiate_and_save_sequential_network(network_list, names, 
+            instantiate_and_save_sequential_network(network_list,
                                             (spec_num, n, spec.layers()))
 
 

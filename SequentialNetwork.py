@@ -12,25 +12,22 @@ class SequentialNetwork(nn.Module):
     each model to be used as and when necessary.
     '''
    
-    def __init__(self, network_list, names):
+    def __init__(self, network_list=list()):
         '''
         Parameters
         ----------
         network_list : List
             Contains all the nn.Layer and nn.Activation modules to be added
             to the model.
-        names : List
-            Contains a identifying string associated with each nn.Layer and 
-            nn.Activation module being added to the model.
-
+            
         Returns
         -------
         None.
 
         '''
         super(SequentialNetwork, self).__init__()
-        for name, module in zip(names, network_list):
-            self.add_module(name, module)
+        for name, module in enumerate(network_list):
+            self.add_module(str(name), module)
     
     def forward(self, X):
         '''
@@ -73,10 +70,10 @@ class SequentialNetwork(nn.Module):
         None.
 
         """
-        torch.save(self.state_dict(), PATH)
+        torch.save(self, PATH)
         
     def load_state_dict(self, state_dict):
-        
+        print('Loading...')
         if not isinstance(state_dict, OrderedDict):
             raise TypeError("Expected state_dict to be dict-like, got {}."
                             .format(type(state_dict)))
@@ -85,6 +82,12 @@ class SequentialNetwork(nn.Module):
         Get all layers!!!!
         Pass (un)initialised param to layer.
         """
+        
+        loading_dict = dict()
+        
+        loading_dict.update(state_dict)
+        
+        self.state_dict() == loading_dict
 # =============================================================================
 #         keys = list() 
 #         layer = list()

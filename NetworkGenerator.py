@@ -3,16 +3,30 @@ from torch import autograd
 from torch import nn
 from torch import optim
 
-import numpy as np
-
 from NetworkSpecification import *
 from SequentialNetwork import *
+
+import random
+import numpy as np
+
+
+# Seed
+seed = 123
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+np.random.seed(seed)
+random.seed(seed)
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
+
 
 
 UNTRAINED_FOLDER = 'Untrained'
 TRAINED_FOLDER = 'Trained'
 EXTENSION = ".pt" 
-
+INPUT_SIZE = 3
+OUTPUT_SIZE = 1
 
 def parse_specifications(user_input):
     """
@@ -21,7 +35,7 @@ def parse_specifications(user_input):
 
     Parameters
     ----------
-    user_input : List
+    user_input : List[<Num_copies, Activation_func, [Neurons]>]
         User inputs a list of tuples containing desired network structures
         including the number of copies per architecture, and the structure
         of the given architecture in terms of activation functions and 
@@ -103,9 +117,9 @@ def generate_networks(network_specifications):
 
         # Instantiate network with list of layers and activation functions
         model = SequentialNetwork(network_list)
+        
                 
         # Generate name based on network (format: "archX_copyX_Xlayers")
-        
         num_spec = "arch" + str(network_info[0])
         copy = "copy" + str(network_info[1])
         layers = str(network_info[2]) + "layers"
@@ -113,6 +127,7 @@ def generate_networks(network_specifications):
 
         # Save network with given name in UNTRAINED folder
         PATH = "/".join([UNTRAINED_FOLDER, filename])
+        print('Model PATH: {}'.format(PATH))
         
         
         model.save(PATH)
@@ -151,13 +166,15 @@ def generate_networks(network_specifications):
             # LazyLinear is used to allow for input_dims to be inferred during
             # the first forward pass through the network.
             for i, layer_size in enumerate(neurons):
-                network_list.append(nn.LazyLinear(layer_size))                
-                network_list.append(get_activation(activation, i))
+                if i == 0:
+                    network_list.append(nn.Linear(INPUT_SIZE, layer_size))                
+                    network_list.append(get_activation(activation, i))
+                else:
+                    network_list.append(nn.Linear(neurons[i-1], layer_size))                
+                    network_list.append(get_activation(activation, i))
             
             # Append final LazyLinear layer corresponding with output_dims=1
-            network_list.append(nn.LazyLinear(1))
-            
-            print(network_list)
+            network_list.append(nn.Linear(neurons[-1], OUTPUT_SIZE))
              
             instantiate_and_save_sequential_network(network_list,
                                             (spec_num, n, spec.layers()))

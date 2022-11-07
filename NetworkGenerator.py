@@ -27,6 +27,7 @@ TRAINED_FOLDER = 'Trained'
 EXTENSION = ".pt" 
 INPUT_SIZE = 3
 OUTPUT_SIZE = 1
+FILE_WITH_SAVED_MODELS = "models.txt"
 
 def parse_specifications(user_input):
     """
@@ -73,7 +74,7 @@ def parse_specifications(user_input):
     return num_architectures, num_networks, network_specs
     
      
-def generate_networks(network_specifications):
+def generate_networks(network_specifications, file_with_saved_models):
     """
     Generate nn.Sequential models based on the parsed input list of
     NetworkSpecification objects. Save each model in an individual rich text
@@ -85,6 +86,9 @@ def generate_networks(network_specifications):
     ----------
     network_specifications : List
         A list containing NetworkSpecification objects.
+    
+    file_with_saved_models : String
+        Name of the file where the PATH of the saved model is stored.
 
     Returns
     -------
@@ -93,7 +97,8 @@ def generate_networks(network_specifications):
     """
    
     ''' Define helper functions '''
-    def instantiate_and_save_sequential_network(network_list, network_info):
+    def instantiate_and_save_sequential_network(network_list, network_info, 
+                                                file_with_saved_models):
         """
         Given a list of nn.Layers, generate a sequential network and save it
         to disk.
@@ -108,6 +113,9 @@ def generate_networks(network_specifications):
             Contains information about the network being instantiated to be 
             used for generating a relevant file name.
 
+        file_with_saved_models : String
+            Name of the file where the PATH of the saved model is stored.
+        
         Returns
         -------
         None.
@@ -131,6 +139,7 @@ def generate_networks(network_specifications):
         
         
         model.save(PATH)
+        write(PATH, file_with_saved_models)
         
         
         
@@ -143,7 +152,6 @@ def generate_networks(network_specifications):
         if type(activation) is list:
             func = activation[index]
        
-        # 
         if func == 'sigmoid':
             return nn.Sigmoid()
         elif func == 'relu':
@@ -177,20 +185,42 @@ def generate_networks(network_specifications):
             network_list.append(nn.Linear(neurons[-1], OUTPUT_SIZE))
              
             instantiate_and_save_sequential_network(network_list,
-                                            (spec_num, n, spec.layers()))
+                                            (spec_num, n, spec.layers()), 
+                                            file_with_saved_models)
 
 
-input = [(1, 'sigmoid', [3, 5, 2])]
-                
-n_arch, n_net, net_spec = parse_specifications(input)
+def write(PATH, filename):
+    """
+    Appends the PATH string to the given file.
 
-generate_networks(net_spec)
+    Parameters
+    ----------
+    PATH : String
+        Path to of the saved, generated model which needs to be saved for later
+        accessing.
+    filename : String
+        Name of file where all the PATHs are being stored.
 
-# =============================================================================
-# def main():
-#     pass
-#     
-# 
-# if __name__ == "__main__":
-#     main()
-# =============================================================================
+    Returns
+    -------
+    None.
+
+    """
+    path = PATH + "\n"
+    with open(filename, "a") as file:
+        file.write(path)
+
+
+def main():
+    # TODO: Ask user for network_specification input
+    
+    user_input = [(1, 'sigmoid', [3, 5, 2]), (1, ['sigmoid', 'sigmoid', 'relu'], [4, 2, 3])] 
+
+    print('All model paths are being written to: {}'.format(FILE_WITH_SAVED_MODELS))
+               
+    n_arch, n_net, net_spec = parse_specifications(user_input)
+    print('{} architectures w/ {} total networks'.format(n_arch, n_net))
+    generate_networks(net_spec, 'models.txt')
+    
+if __name__ == "__main__":
+    main()

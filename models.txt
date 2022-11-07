@@ -1,0 +1,3 @@
+Untrained/arch0_copy0_3layers.pt
+Untrained/arch0_copy0_3layers.pt
+Untrained/arch1_copy0_3layers.pt

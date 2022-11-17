@@ -1,6 +1,8 @@
 import torch
 from torch import nn
-from collections import OrderedDict
+from torchsummary import summary
+from io import StringIO
+
 
 class SequentialNetwork(nn.Module):
     '''
@@ -26,6 +28,9 @@ class SequentialNetwork(nn.Module):
 
         '''
         super(SequentialNetwork, self).__init__()
+        
+        self.INPUT_SIZE = network_list[0].in_features
+        
         for name, module in enumerate(network_list):
             self.add_module(str(name), module)
     
@@ -55,15 +60,13 @@ class SequentialNetwork(nn.Module):
     
     def save(self, PATH):
         """
-        Saves the state_dict (type OrderedDict) to the given path as a .pt
-        file. This file can later be loaded into another instantiated model.
+        Saves the entire model to the given path as a .pt file. This file can 
+        later be loaded using torch.load().
 
         Parameters
         ----------
         PATH : String
-            Directs where the torch.save() function saves the state_dict for 
-            the given model instance. This string contains folder/filename 
-            information, and new folders/files are created as necessary.
+            Contains path to location on disk where the model is saved.
 
         Returns
         -------
@@ -71,37 +74,18 @@ class SequentialNetwork(nn.Module):
 
         """
         torch.save(self, PATH)
-        
-    def load_state_dict(self, state_dict):
-        print('Loading...')
-        if not isinstance(state_dict, OrderedDict):
-            raise TypeError("Expected state_dict to be dict-like, got {}."
-                            .format(type(state_dict)))
-        """
-        Get all layer names.
-        Get all layers!!!!
-        Pass (un)initialised param to layer.
-        """
-        
-        loading_dict = dict()
-        
-        loading_dict.update(state_dict)
-        
-        self.state_dict() == loading_dict
-# =============================================================================
-#         keys = list() 
-#         layer = list()
-#         for key in state_dict.keys():
-#             keys.append(key)
-#             params.append(state_dict.get(key))
-#         
-#         self.names = keys
-#         self.network_list = params
-# =============================================================================
-        
+                
     
     def train(self, X_train, y_train):
         pass
     
     def test(self, X_test, Y):
         pass
+    
+    def summary(self, input_size=None):
+        if input_size is None:
+            summary(self, (1, self.INPUT_SIZE))
+        else:
+            summary(self, input_size)
+        
+        

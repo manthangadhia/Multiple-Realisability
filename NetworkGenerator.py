@@ -58,6 +58,33 @@ def parse_specifications(user_input):
 
     """
     
+    def check_activation(activation, neurons):
+        """
+        If List() activation is provided by user, this method checks that 
+        the list is sufficiently defined, i.e. it has the same number of 
+        elements as there are layers.
+
+        Parameters
+        ----------
+        activation : List / String
+            Contains information about the activation functions desired by the 
+            user.
+        neurons : List
+            Contains information about the number and size of layers desired 
+            by the user for the given model.
+
+        Returns
+        -------
+        Boolean
+            Whether the defined activation input is accurate. If the activation
+            is a single string value, then the requirements are always met.
+
+        """
+        if type(activation) is list:
+            return len(activation) == len(neurons)
+        return True
+            
+    
     # The number of elements (tuples) indicated the number of distinct
     # architectures.
     num_architectures = len(user_input)
@@ -67,6 +94,11 @@ def parse_specifications(user_input):
     
     for arch in user_input:
         N, act, neur = arch
+        
+        # Check for accurate activation input
+        if not check_activation(act, neur):
+            print('error') #TODO
+            
         network_specs.append(NetworkSpecification(N, act, neur))
         
         num_networks += N
@@ -79,8 +111,6 @@ def generate_networks(network_specifications, file_with_saved_models):
     Generate nn.Sequential models based on the parsed input list of
     NetworkSpecification objects. Save each model in an individual rich text
     file with adaptive naming scheme.
-    
-    ?? Return path on disk to saved models ??
 
     Parameters
     ----------
@@ -156,6 +186,8 @@ def generate_networks(network_specifications, file_with_saved_models):
             return nn.Sigmoid()
         elif func == 'relu':
             return nn.ReLU()
+        elif func == 'none':
+            pass
         else:
             raise NotImplementedError()
     
@@ -196,8 +228,7 @@ def write(PATH, filename):
     Parameters
     ----------
     PATH : String
-        Path to of the saved, generated model which needs to be saved for later
-        accessing.
+        Path to the location where generated models are saved.
     filename : String
         Name of file where all the PATHs are being stored.
 

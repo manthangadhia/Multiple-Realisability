@@ -5,8 +5,6 @@ class NetworkSpecification():
         number of neurons per layer.
         The number of layers is implicitly computed by determining the length
         of the list of neurons.
-        
-        ?? This object also stores the init seed for each network ??
     '''
     def __init__ (self, N, activation, neurons):
         self.N = N

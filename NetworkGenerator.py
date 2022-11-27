@@ -1,13 +1,12 @@
 import torch
-from torch import autograd
 from torch import nn
-from torch import optim
 
 from NetworkSpecification import *
 from SequentialNetwork import *
 
 import random
 import numpy as np
+import os
 
 
 # Seed
@@ -165,7 +164,6 @@ def generate_networks(network_specifications, file_with_saved_models):
 
         # Save network with given name in UNTRAINED folder
         PATH = "/".join([UNTRAINED_FOLDER, filename])
-        print('Model PATH: {}'.format(PATH))
         
         
         model.save(PATH)
@@ -221,6 +219,25 @@ def generate_networks(network_specifications, file_with_saved_models):
                                             file_with_saved_models)
 
 
+def write_preamble(n_arch, n_net, filename):
+    
+    
+    buffer = '-----\n'
+    file_size = os.path.getsize(filename)
+    if file_size > 0:
+        """ If file is not empty, replace with an empty file"""
+        open(filename, 'w').close()   
+    
+    
+    with open(filename, 'a') as file:
+        file.write('Number of networks: {}\n'.format(n_net))
+        file.write('Number of architectures: {}\n'.format(n_arch))
+        file.write('\n')
+        file.write(buffer)
+        
+        
+
+
 def write(PATH, filename):
     """
     Appends the PATH string to the given file.
@@ -237,6 +254,8 @@ def write(PATH, filename):
     None.
 
     """
+
+    
     path = PATH + "\n"
     with open(filename, "a") as file:
         file.write(path)
@@ -245,13 +264,19 @@ def write(PATH, filename):
 def main():
     # TODO: Ask user for network_specification input
     
-    user_input = [(1, 'sigmoid', [3, 5, 2]), (1, ['sigmoid', 'sigmoid', 'relu'], [4, 2, 3])] 
-
+# =============================================================================
+#     user_input = [(1, 'sigmoid', [3, 5, 2]), 
+#                   (1, ['sigmoid', 'sigmoid', 'relu'], [4, 2, 3])] 
+# 
+# =============================================================================
+    
+    user_input = [(1, ['sigmoid', 'sigmoid', 'relu'], [4, 4, 2])]
     print('All model paths are being written to: {}'.format(FILE_WITH_SAVED_MODELS))
                
     n_arch, n_net, net_spec = parse_specifications(user_input)
-    print('{} architectures w/ {} total networks'.format(n_arch, n_net))
-    generate_networks(net_spec, 'models.txt')
+    print('Identified {} architectures with {} total networks.'.format(n_arch, n_net))
+    write_preamble(n_arch, n_net, FILE_WITH_SAVED_MODELS)
+    generate_networks(net_spec, FILE_WITH_SAVED_MODELS)
     
 if __name__ == "__main__":
     main()

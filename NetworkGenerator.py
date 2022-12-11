@@ -9,15 +9,17 @@ import numpy as np
 import os
 
 
-# Seed
-seed = 123
-torch.manual_seed(seed)
-torch.cuda.manual_seed(seed)
-torch.cuda.manual_seed_all(seed)
-np.random.seed(seed)
-random.seed(seed)
-torch.backends.cudnn.benchmark = False
-torch.backends.cudnn.deterministic = True
+# =============================================================================
+# # Seed
+# seed = 123
+# torch.manual_seed(seed)
+# torch.cuda.manual_seed(seed)
+# torch.cuda.manual_seed_all(seed)
+# np.random.seed(seed)
+# random.seed(seed)
+# torch.backends.cudnn.benchmark = False
+# torch.backends.cudnn.deterministic = True
+# =============================================================================
 
 
 
@@ -66,17 +68,14 @@ def parse_specifications(user_input):
         Parameters
         ----------
         activation : List / String
-            Contains information about the activation functions desired by the 
-            user.
+            Contains activation functions desired by the user.
         neurons : List
-            Contains information about the number and size of layers desired 
-            by the user for the given model.
+            Contains information about the number and size of layers.
 
         Returns
         -------
         Boolean
-            Whether the defined activation input is accurate. If the activation
-            is a single string value, then the requirements are always met.
+            Whether the defined activation input is accurate.
 
         """
         if type(activation) is list:
@@ -108,8 +107,8 @@ def parse_specifications(user_input):
 def generate_networks(network_specifications, file_with_saved_models):
     """
     Generate nn.Sequential models based on the parsed input list of
-    NetworkSpecification objects. Save each model in an individual rich text
-    file with adaptive naming scheme.
+    NetworkSpecification objects. Save each model in an individual text file 
+    with adaptive naming scheme.
 
     Parameters
     ----------
@@ -184,7 +183,7 @@ def generate_networks(network_specifications, file_with_saved_models):
             return nn.Sigmoid()
         elif func == 'relu':
             return nn.ReLU()
-        elif func == 'none':
+        elif func == 'none' or func == None:
             pass
         else:
             raise NotImplementedError()
@@ -196,13 +195,14 @@ def generate_networks(network_specifications, file_with_saved_models):
     # Unpack specification
         N, activation, neurons = spec.N, spec.activation, spec.neurons
          
-        network_list = list()
         
         # Create N networks with the given specification
         for n in range(N):
-            
-            # LazyLinear is used to allow for input_dims to be inferred during
-            # the first forward pass through the network.
+                    
+            network_list = list()
+
+            # Design choice was made to avoid using LazyLinear layers, and 
+            # instead the output size of previous layers is manually inferred.
             for i, layer_size in enumerate(neurons):
                 if i == 0:
                     network_list.append(nn.Linear(INPUT_SIZE, layer_size))                
@@ -211,7 +211,7 @@ def generate_networks(network_specifications, file_with_saved_models):
                     network_list.append(nn.Linear(neurons[i-1], layer_size))                
                     network_list.append(get_activation(activation, i))
             
-            # Append final LazyLinear layer corresponding with output_dims=1
+            # Append final Linear layer corresponding with output_dims=1
             network_list.append(nn.Linear(neurons[-1], OUTPUT_SIZE))
              
             instantiate_and_save_sequential_network(network_list,
@@ -264,17 +264,15 @@ def write(PATH, filename):
 def main():
     # TODO: Ask user for network_specification input
     
-# =============================================================================
-#     user_input = [(1, 'sigmoid', [3, 5, 2]), 
-#                   (1, ['sigmoid', 'sigmoid', 'relu'], [4, 2, 3])] 
-# 
-# =============================================================================
-    
-    user_input = [(1, ['sigmoid', 'sigmoid', 'relu'], [4, 4, 2])]
-    print('All model paths are being written to: {}'.format(FILE_WITH_SAVED_MODELS))
+    user_input = [(1, 'sigmoid', [4, 2, 3]), 
+                  (1, [None, None, 'sigmoid'], [4, 2, 3])] 
+
+    print('All model paths are being written to: {}'
+          .format(FILE_WITH_SAVED_MODELS))
                
     n_arch, n_net, net_spec = parse_specifications(user_input)
-    print('Identified {} architectures with {} total networks.'.format(n_arch, n_net))
+    print('Identified {} architectures with {} total networks.'
+          .format(n_arch, n_net))
     write_preamble(n_arch, n_net, FILE_WITH_SAVED_MODELS)
     generate_networks(net_spec, FILE_WITH_SAVED_MODELS)
     

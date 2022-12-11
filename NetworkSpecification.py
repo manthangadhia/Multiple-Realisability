@@ -23,19 +23,3 @@ class NetworkSpecification():
         """
         return len(self.neurons)
     
-    def __str__(self):
-        """
-        Prints a pretty string outlining the particular network architecture.
-
-        Returns ---
-        -------
-        None.
-
-        """
-        act = ""
-        
-        if type(self.activation) == str:
-            act = "All layers in this network share the same activation function."
-        else:
-            act = "Each layer in the network has an individual activation function."
-        return act

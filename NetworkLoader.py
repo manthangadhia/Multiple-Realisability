@@ -28,7 +28,7 @@ def read_and_train_models(filename):
             # Check each line for reference to Untrained folder, load model
             if re.search('Untrained', text, flags=re.IGNORECASE): 
                 loader = text.replace('\n', '')
-                print('Identified model: {}'.format(text))
+                print('\n\nIdentified model: {}'.format(text))
                 model = torch.load(loader)
                 
                 # TODO: Train models
@@ -47,13 +47,6 @@ def main():
     FILENAME = 'models.txt'
 
     print('Currently loading will be done from: {}'.format(FILENAME))
-# =============================================================================
-#     change = input('Would you like to specify another file? [y/n]\n>>> ')
-#     if change == 'y':
-#         FILENAME = input('Specify the name of the new file (with path if it is not in the current project folder).\n>>> ')
-#         print('New file to load from: {}'.format(FILENAME))
-#     
-# =============================================================================
     print('The models will be trained on the following input: \nX: {}\ny: {}'
           .format(X, Y))
     print(README) #TODO: add to readme

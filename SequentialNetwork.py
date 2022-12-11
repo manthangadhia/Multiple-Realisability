@@ -5,19 +5,7 @@ from torch import optim
 
 from torchsummary import summary
 
-import random
 import numpy as np
-
-
-# Seed
-seed = 123
-torch.manual_seed(seed)
-torch.cuda.manual_seed(seed)
-torch.cuda.manual_seed_all(seed)
-np.random.seed(seed)
-random.seed(seed)
-torch.backends.cudnn.benchmark = False
-torch.backends.cudnn.deterministic = True
 
 
 class SequentialNetwork(nn.Module):
@@ -47,11 +35,13 @@ class SequentialNetwork(nn.Module):
         '''
         super(SequentialNetwork, self).__init__()
         
+        self.network_list = network_list
+        
         # Instantiate necessary variables
         self.INPUT_SIZE = network_list[0].in_features
         self.successfully_trained = False
         
-        for name, module in enumerate(network_list):
+        for name, module in enumerate(self.network_list):
             self.add_module(str(name), module)
     
     
@@ -102,7 +92,7 @@ class SequentialNetwork(nn.Module):
     
     
     def train(self, X, Y, loss=nn.MSELoss(), optimiser=optim.SGD, 
-              epochs=500, momentum=0.9, lr=0.05, decay=0, epsilon=1e-5): 
+              epochs=5000, momentum=0.9, lr=0.05, decay=0, epsilon=1e-5): 
         
         self.loss_tracker = np.zeros(shape=(epochs+1))
         train_steps= X.size(0)
